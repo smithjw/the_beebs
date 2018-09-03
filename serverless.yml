@@ -11,7 +11,7 @@
 #
 # Happy Coding!
 
-service: zendesk-status-updater
+service: bieber-bot
 
 provider:
     name: aws
@@ -19,7 +19,7 @@ provider:
 
 functions:
     update_status:
-        handler: handler.lambda_update_status
+        handler: bieber.lambda_update_status
         events:
             - http:
                 path: status
