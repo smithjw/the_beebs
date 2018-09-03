@@ -14,13 +14,14 @@ def is_request_valid(request):
 
     return is_token_valid and is_team_id_valid
 
-def publish_to_sns(response_url):
+# Get the full response from the /command and send it into SNS
+def publish_to_sns(slash_command_response):
 
     client = boto3.client('sns',region_name='us-east-1')
 
     response = client.publish(
         TopicArn='arn:aws:sns:us-east-1:465039758259:Test',
-        Message=response_url
+        Message=slash_command_response
     )
     print("Response: {}".format(response))
 
@@ -29,7 +30,8 @@ def bieber():
     if not is_request_valid:
         abort(400)
 
-    publish_to_sns(request.form['response_url'])
+    slash_command_response = request.form.to_dict(flat=False)
+    publish_to_sns(slash_command_response)
 
     return jsonify(
         response_type='ephemeral',
