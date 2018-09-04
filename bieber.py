@@ -3,7 +3,6 @@ import requests
 import boto3
 import json
 
-from time import sleep
 from flask import abort, Flask, jsonify, request
 
 app = Flask(__name__)
@@ -27,7 +26,8 @@ def getParameter(param_name):
 def is_request_valid(request):
     token = getParameter('PA_SLACK_VERIFICATION_TOKEN')
     team_id = getParameter('PA_SLACK_TEAM_ID')
-    
+    print(token, team_id)
+
     is_token_valid = request.form['token'] == token
     is_team_id_valid = request.form['team_id'] == team_id
 
