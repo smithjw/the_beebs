@@ -18,22 +18,21 @@ provider:
     runtime: python3.6
 
 functions:
-    update_status:
-        handler: bieber.lambda_update_status
+    initial_response:
+        handler: bieber.app
         events:
             - http:
-                path: status
+                path: bieber
                 method: post
-    update_assignee:
-        handler: handler.lambda_update_assignee
+    response_followup:
+        handler: bieber_followup.lambda_func
         events:
-            - http:
-                path: assignee
-                method: post
+            - sns: arn:aws:sns:us-east-1:465039758259:Test
 
 plugins:
-    - serverless-python-requirements
-
+  - serverless-python-requirements
+  - serverless-wsgi
+  
 custom:
     pythonRequirements:
         dockerizePip: non-linux

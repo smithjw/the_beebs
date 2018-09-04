@@ -1,0 +1,4 @@
+boto3==1.8.6
+requests==2.19.1
+slackclient==1.2.1
+flask==1.0.2
