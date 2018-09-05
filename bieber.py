@@ -2,6 +2,7 @@ import os
 import requests
 import boto3
 import json
+import re
 
 from flask import abort, Flask, jsonify, request
 
@@ -34,12 +35,12 @@ def is_request_valid(request):
     return is_token_valid and is_team_id_valid
 
 # Get the full response from the /command and send it into SNS
-def publish_to_sns(slash_command_response):
+def publish_to_sns(slash_command_response, sns_arn):
 
-    client = boto3.client('sns',region_name='us-east-1')
+    sns = boto3.client('sns',region_name='us-east-1')
 
-    response = client.publish(
-        TopicArn='arn:aws:sns:us-east-1:465039758259:Test',
+    response = sns.publish(
+        TopicArn=sns_arn,
         Message=slash_command_response
     )
     print("Response: {}".format(response))
@@ -50,9 +51,41 @@ def bieber():
         abort(400)
 
     slash_command_response = request.form.to_dict(flat=False)
-    publish_to_sns(json.dumps(slash_command_response))
+    sns_message = json.dumps(slash_command_response)
+    text = slash_command_response['text'][0]
 
-    return jsonify(
-        response_type='ephemeral',
-        text='You\'ve just Biebered me! To add insult to injury, <jamfselfservice://content?entity=policy&id=337&action=execute|click here> :smiling_imp:',
+    if any(re.findall(r'stat', text, re.IGNORECASE)):
+        # Can this be replaced with an Env Var from the serverless.yml file?
+        sns_arn = 'arn:aws:sns:us-east-1:465039758259:Test1'
+
+        # Ucomment this when additional function is written to pull stats from DynamoDB
+        # publish_to_sns(sns_message, sns_arn)
+
+        return jsonify(
+            response_type = 'in_channel',
+            text = 'Here are the stats for the most Biebered individual:',
+            )
+
+    elif any(re.findall(r'<@U', text, re.IGNORECASE)):
+        sns_arn = 'arn:aws:sns:us-east-1:465039758259:Test'
+        publish_to_sns(sns_message, sns_arn)
+
+        # Should turn the link in the following message into a Slack Button
+        return jsonify(
+            response_type='ephemeral',
+            text='You\'ve just Biebered me! To add insult to injury, <jamfselfservice://content?entity=policy&id=337&action=execute|click here> :smiling_imp:',
+            )
+
+    elif any(re.findall(r'help', text, re.IGNORECASE)):
+        return jsonify(
+            response_type = 'ephemeral',
+            text = 'Here\'s what I can do!'
+            # I should put a Slack Attachment in here
+        )
+
+    else:
+        return jsonify(
+            response_type = 'ephemeral',
+            text = 'That\'s not a valid command, try `/bieber help`'
+            # I should put a Slack Attachment in here
         )

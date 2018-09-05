@@ -40,7 +40,9 @@ provider:
       Resource:
         - { 'Fn::GetAtt': ['DynamoDBUsersTable', 'Arn' ] }
     environment:
-        BIEBERED_TABLE: ${self:custom.tableName}
+        biebered_table_name: ${self:custom.tableName}
+        biebered_sns: ${self:custom.snsBiebered}
+        stats_sns: ${self:custom.snsStats}
 
 
 functions:
@@ -52,6 +54,10 @@ functions:
         handler: bieber_followup.lambda_func
         events:
             - sns: 'arn:aws:sns:us-east-1:465039758259:Test'
+    update_dynamo:
+        handler: update_db.lambda_func
+        events:
+            - sns: 'arn:aws:sns:us-east-1:465039758259:Test'
 
 
 plugins:
@@ -59,6 +65,8 @@ plugins:
   - serverless-wsgi
 custom:
     tableName: 'BieberedUsersTable-${self:provider.stage}'
+    snsBiebered: 'BieberedQueue-${self:provider.stage}'
+    snsStats: 'BieberedStats-${self:provider.stage}'
     wsgi:
         app: bieber.app
         packRequirements: false

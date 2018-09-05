@@ -21,6 +21,7 @@ JSON-Data/
 *.csv
 node_modules/
 __pycache__
+test.py
 
 
 # Serverless directories
