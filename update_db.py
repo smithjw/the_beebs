@@ -1,6 +1,14 @@
 import os
 import json
 import boto3
+import re
+
+
+def extract_user_id(text):
+    user_id = re.split('@|\|', text)[1]
+
+    return user_id
+
 
 def write_db_data(message, timestamp):
     table_name = os.environ['biebered_table_name']
@@ -9,27 +17,23 @@ def write_db_data(message, timestamp):
     table = dynamodb.Table(table_name)
 
     user_id = message['user_id'][0]
-    biebered_by = message['text'][0]
+    # biebered_by = message['text'][0]
+    biebered_by = extract_user_id(message['text'][0])
 
     print(user_id, biebered_by, timestamp)
 
-    # response = dynamo.update_item(
-    #     TableName='string',
-    #     Key={'user_id': {'S': user_id}},
-    #     UpdateExpression={'biebered_by': biebered_by}
-    # )
 
     response = table.update_item(
         Key={
             'user_id': user_id
         },
-        UpdateExpression='SET biebered_by = list_append(biebered_by, :vals)',
+        UpdateExpression='SET biebered_by = :vals',
         ExpressionAttributeValues={
             ':vals': {
-                timestamp: [
-                    {'timestamp': timestamp},
-                    {'name': biebered_by}
-                ]
+                timestamp: {
+                    'user_id': biebered_by,
+                    'test': 'Blah'
+                }
             }
         }
     )
@@ -52,6 +56,6 @@ def lambda_func(event, context):
 if __name__ == '__main__':
     with open('test_message.json', encoding='utf-8') as json_file:
         message = json_file.read()
-    timestamp = '2018-09-05T04:13:39.960Z'
+    timestamp = '2018-09-06T04:13:39.960Z'
 
     main(message, timestamp)
