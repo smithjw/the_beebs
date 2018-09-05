@@ -46,17 +46,17 @@ def dm_biebered_user(token, user_id):
         text='Hello, you\'ve just been Biebered :sob:. <https://cultureamp.atlassian.net/wiki/spaces/Prod/pages/700744276/How+to+not+get+biebered|Click here> to view our Confluence article on how not to be :bieber:Biebered:bieber: in the future!'
     )
 
+
 def main(event):
     print(event['Records'][0]['Sns']['Message'])
     slash_command_data = json.loads(event['Records'][0]['Sns']['Message'])
-    print(slash_command_data)
     response_url = slash_command_data['response_url'][0]
     user_id = slash_command_data['user_id'][0]
     token = getParameter('PA_SLACK_BOT_TOKEN')
-    print(token)
 
     bieber_comment(response_url)
     dm_biebered_user(token, user_id)
+
 
 def lambda_func(event, context):
     main(event)

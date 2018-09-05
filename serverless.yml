@@ -29,6 +29,18 @@ provider:
         - 'arn:aws:ssm:us-east-1:465039758259:parameter/PA_TEAM_ID'
         - 'arn:aws:ssm:us-east-1:465039758259:parameter/PA_SLACK_BOT_TOKEN'
         - 'arn:aws:ssm:us-east-1:465039758259:parameter/PA_SLACK_VERIFICATION_TOKEN'
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - { 'Fn::GetAtt': ['DynamoDBUsersTable', 'Arn' ] }
+    environment:
+        BIEBERED_TABLE: ${self:custom.tableName}
 
 
 functions:
@@ -45,11 +57,29 @@ functions:
 plugins:
   - serverless-python-requirements
   - serverless-wsgi
-
-
 custom:
+    tableName: 'BieberedUsersTable-${self:provider.stage}'
     wsgi:
         app: bieber.app
         packRequirements: false
     pythonRequirements:
         dockerizePip: non-linux
+
+
+resources:
+    Resources:
+        DynamoDBUsersTable:
+            Type: 'AWS::DynamoDB::Table'
+            Properties:
+                AttributeDefinitions:
+                    -
+                        AttributeName: user_id
+                        AttributeType: S
+                KeySchema:
+                    -
+                        AttributeName: user_id
+                        KeyType: HASH
+                ProvisionedThroughput:
+                    ReadCapacityUnits: 1
+                    WriteCapacityUnits: 1
+                TableName: ${self:custom.tableName}
