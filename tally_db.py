@@ -22,7 +22,7 @@ def getParameter(param_name):
 
 
 def read_db_data():
-    table_name = os.environ['biebered_table_name']
+    table_name = os.environ['users_table_name']
     dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
     table = dynamodb.Table(table_name)
 
@@ -46,8 +46,17 @@ def main():
 
 
 def lambda_func(event, context):
+    print(event)
     main()
 
 
 if __name__ == '__main__':
-    main()
+    with open('dynamodb_stream_test_data', encoding='utf-8') as event:
+        stream_data = json.loads(event.read())
+        print(stream_data['Records'][0]['dynamodb']['NewImage']['biebered_by']['M'])
+
+        biebered_count = len(stream_data['Records'][0]['dynamodb']['NewImage']['biebered_by']['M'])
+        print(biebered_count)
+
+
+    #main()

@@ -56,7 +56,7 @@ def bieber():
 
     if any(re.findall(r'stat', text, re.IGNORECASE)):
         # Can this be replaced with an Env Var from the serverless.yml file?
-        sns_arn = 'arn:aws:sns:us-east-1:465039758259:Test1'
+        sns_arn = os.environ['stats_sns']
 
         # Ucomment this when additional function is written to pull stats from DynamoDB
         # publish_to_sns(sns_message, sns_arn)
@@ -67,7 +67,7 @@ def bieber():
             )
 
     elif any(re.findall(r'<@U', text, re.IGNORECASE)):
-        sns_arn = 'arn:aws:sns:us-east-1:465039758259:Test'
+        sns_arn = os.environ['biebered_sns']
         publish_to_sns(sns_message, sns_arn)
 
         # Should turn the link in the following message into a Slack Button

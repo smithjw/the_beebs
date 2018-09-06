@@ -62,7 +62,7 @@ def create_user_item(table, timestamp, user_id, uid_first, uid_last, uid_email):
 
 
 def write_db_data(timestamp, user_id_info, biebered_by_info):
-    table_name = os.environ['biebered_table_name']
+    table_name = os.environ['users_table_name']
     dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
     table = dynamodb.Table(table_name)
 
