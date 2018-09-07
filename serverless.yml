@@ -20,7 +20,10 @@ provider:
     - Effect: Allow
       Action:
         - sns:Publish
-      Resource: 'arn:aws:sns:us-east-1:465039758259:Test'
+      Resource:
+        - '${self:custom.snsBieberedArn}'
+        - '${self:custom.snsStatsArn}'
+
     - Effect: Allow
       Action:
         - ssm:GetParameters
@@ -49,8 +52,8 @@ provider:
         users_table_name: ${self:custom.usersTableName}
         biebered_table_name: ${self:custom.usersBieberedTableName}
         biebered_by_table_name: ${self:custom.usersBieberedByTableName}
-        biebered_sns: ${self:custom.snsBiebered}
-        stats_sns: ${self:custom.snsStats}
+        biebered_sns_arn: ${self:custom.snsBieberedArn}
+        stats_sns_arn: ${self:custom.snsStatsArn}
 
 
 functions:
@@ -61,11 +64,11 @@ functions:
     response_followup:
         handler: bieber_followup.lambda_func
         events:
-            - sns: 'arn:aws:sns:us-east-1:465039758259:Test'
+            - sns: ${self:custom.snsBiebered}
     update_dynamo:
         handler: update_db.lambda_func
         events:
-            - sns: 'arn:aws:sns:us-east-1:465039758259:Test'
+            - sns: ${self:custom.snsBiebered}
     tally_db:
         handler: tally_db.lambda_func
         events:
@@ -84,8 +87,9 @@ custom:
     usersTableName: 'UsersTable-${self:provider.stage}'
     usersBieberedTableName: 'BieberedUsersTable-${self:provider.stage}'
     usersBieberedByTableName: 'BieberedByUsersTable-${self:provider.stage}'
-    snsBiebered: 'BieberedQueue-${self:provider.stage}'
-    snsStats: 'BieberedStats-${self:provider.stage}'
+    snsBieberedName: 'Biebered-${self:provider.stage}'
+    snsStatsName: 'Stats-${self:provider.stage}'
+
     wsgi:
         app: bieber.app
         packRequirements: false
@@ -146,11 +150,11 @@ resources:
                 TableName: ${self:custom.usersBieberedByTableName}
                 StreamSpecification:
                     StreamViewType: NEW_IMAGE
-        SnsBiebered:
+        snsBieberedArn:
             Type: AWS::SNS::Topic
             Properties:
-                DisplayName: ${self:custom.snsBiebered}
-        SnsStats:
+                DisplayName: ${self:custom.snsBieberedName}
+        snsStatsArn:
             Type: AWS::SNS::Topic
             Properties:
-                DisplayName: ${self:custom.snsStats}
+                DisplayName: ${self:custom.snsStatsName}
