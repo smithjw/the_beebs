@@ -2,8 +2,11 @@
   "name": "bieber-bot",
   "description": "",
   "version": "0.1.0",
-  "dependencies": {},
+  "dependencies": {
+    "serverless": "^1.30.3"
+  },
   "devDependencies": {
+    "serverless-iam-roles-per-function": "^1.0.4",
     "serverless-python-requirements": "^4.1.1",
     "serverless-wsgi": "^1.5.0"
   }

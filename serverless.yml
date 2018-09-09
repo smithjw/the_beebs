@@ -19,39 +19,17 @@ provider:
     iamRoleStatements:
         - Effect: Allow
           Action:
-            - sns:Publish
-          Resource:
-            - ${self:custom.snsBieberedArn}
-            - ${self:custom.snsStatsArn}
-        - Effect: Allow
-          Action:
             - ssm:GetParameters
             - ssm:GetParameter
           Resource:
             - 'arn:aws:ssm:us-east-1:465039758259:parameter/PA_TEAM_ID'
             - 'arn:aws:ssm:us-east-1:465039758259:parameter/PA_SLACK_BOT_TOKEN'
             - 'arn:aws:ssm:us-east-1:465039758259:parameter/PA_SLACK_VERIFICATION_TOKEN'
-        - Effect: Allow
-          Action:
-            - dynamodb:Query
-            - dynamodb:Scan
-            - dynamodb:GetItem
-            - dynamodb:PutItem
-            - dynamodb:UpdateItem
-            - dynamodb:DeleteItem
-            - dynamodb:DescribeStream
-            - dynamodb:GetRecords
-            - dynamodb:GetShardIterator
-            - dynamodb:ListStreams
-          Resource:
-            - ${self:custom.dbUsersArn}
-            - ${self:custom.dbBieberedArn}
-            - ${self:custom.dbBieberedByArn}
 
     environment:
         users_table_name: ${self:custom.usersTableName}
-        biebered_table_name: ${self:custom.usersBieberedTableName}
-        biebered_by_table_name: ${self:custom.usersBieberedByTableName}
+        users_tally_table_name: ${self:custom.usersTallyTableName}
+        # biebered_by_table_name: ${self:custom.usersBieberedByTableName}
         biebered_sns_arn: ${self:custom.snsBieberedArn}
         stats_sns_arn: ${self:custom.snsStatsArn}
 
@@ -61,24 +39,45 @@ functions:
         handler: wsgi.handler
         events:
             - http: POST /bieber
+        iamRoleStatementsName: initial_response_role
+        iamRoleStatementsInherit: true
+        iamRoleStatements:
+            - Effect: Allow
+              Action:
+                - sns:Publish
+              Resource:
+                - ${self:custom.snsBieberedArn}
+                - ${self:custom.snsStatsArn}
     response_followup:
         handler: bieber_followup.lambda_func
         events:
             - sns: arn:aws:sns:${self:provider.region}:465039758259:${self:custom.snsBieberedName}
-                # topicName: ${self:custom.snsBieberedName}
-                # displayName: Biebered Users SNS
-    update_dynamo:
-        handler: update_db.lambda_func
-        events:
-            - sns: arn:aws:sns:${self:provider.region}:465039758259:${self:custom.snsBieberedName}
-                # topicName: ${self:custom.snsBieberedName}
-                # displayName: Biebered Users SNS
     get_stats:
         handler: bieber_stats.lambda_func
         events:
             - sns: arn:aws:sns:${self:provider.region}:465039758259:${self:custom.snsStatsName}
-                # topicName: ${self:custom.snsStatsName}
-                # displayName: Biebered Stats SNS
+    update_db:
+        handler: update_db.lambda_func
+        events:
+            - sns: arn:aws:sns:${self:provider.region}:465039758259:${self:custom.snsBieberedName}
+        iamRoleStatementsName: update_db_role
+        iamRoleStatementsInherit: true
+        iamRoleStatements:
+            - Effect: Allow
+              Action:
+                - dynamodb:Query
+                - dynamodb:Scan
+                - dynamodb:GetItem
+                - dynamodb:PutItem
+                - dynamodb:UpdateItem
+                - dynamodb:DescribeStream
+                - dynamodb:GetRecords
+                - dynamodb:GetShardIterator
+                - dynamodb:ListStreams
+              Resource:
+                - ${self:custom.dbUsersArn}
+                - ${self:custom.dbUsersTallyArn}
+                # - ${self:custom.dbBieberedByArn}
     tally_db:
         handler: tally_db.lambda_func
         events:
@@ -88,16 +87,35 @@ functions:
                     Fn::GetAtt:
                         - DynamoDBUsersTable
                         - StreamArn
+        iamRoleStatementsName: tally_db_role
+        iamRoleStatementsInherit: true
+        iamRoleStatements:
+            - Effect: Allow
+              Action:
+                - dynamodb:Query
+                - dynamodb:Scan
+                - dynamodb:GetItem
+                - dynamodb:PutItem
+                - dynamodb:UpdateItem
+                - dynamodb:DescribeStream
+                - dynamodb:GetRecords
+                - dynamodb:GetShardIterator
+                - dynamodb:ListStreams
+              Resource:
+                - ${self:custom.dbUsersArn}
+                - ${self:custom.dbUsersTallyArn}
+                # - ${self:custom.dbBieberedByArn}
 
 
 plugins:
   - serverless-python-requirements
   - serverless-wsgi
+  - serverless-iam-roles-per-function
+
 
 custom:
     usersTableName: 'UsersTable-${self:provider.stage}'
-    usersBieberedTableName: 'BieberedUsersTable-${self:provider.stage}'
-    usersBieberedByTableName: 'BieberedByUsersTable-${self:provider.stage}'
+    usersTallyTableName: 'UsersTallyTable-${self:provider.stage}'
     snsBieberedName: 'Biebered-${self:provider.stage}'
     snsStatsName: 'Stats-${self:provider.stage}'
 
@@ -125,15 +143,16 @@ custom:
                   - TopicName
 
     dbUsersArn: { 'Fn::GetAtt': ['DynamoDBUsersTable', 'Arn' ] }
-    #dbUsersStreamArn: { 'Fn::GetAtt': ['DynamoDBUsersTable', 'StreamArn' ] }
-    dbBieberedArn: { 'Fn::GetAtt': ['DynamoDBBieberedTable', 'Arn' ] }
-    dbBieberedByArn: { 'Fn::GetAtt': ['DynamoDBBieberedByTable', 'Arn' ] }
+    dbUsersTallyArn: { 'Fn::GetAtt': ['DynamoDBBieberedTable', 'Arn' ] }
+    # dbBieberedByArn: { 'Fn::GetAtt': ['DynamoDBBieberedByTable', 'Arn' ] }
 
     wsgi:
         app: bieber.app
         packRequirements: false
     pythonRequirements:
         dockerizePip: non-linux
+    serverless-iam-roles-per-function:
+        defaultInherit: true
 
 
 resources:
@@ -155,7 +174,7 @@ resources:
                 TableName: ${self:custom.usersTableName}
                 StreamSpecification:
                     StreamViewType: NEW_IMAGE
-        DynamoDBBieberedTable:
+        DynamoDBUsersTallyTable:
             Type: 'AWS::DynamoDB::Table'
             Properties:
                 AttributeDefinitions:
@@ -169,26 +188,26 @@ resources:
                 ProvisionedThroughput:
                     ReadCapacityUnits: 1
                     WriteCapacityUnits: 1
-                TableName: ${self:custom.usersBieberedTableName}
+                TableName: ${self:custom.usersTallyTableName}
                 StreamSpecification:
                     StreamViewType: NEW_IMAGE
-        DynamoDBBieberedByTable:
-            Type: 'AWS::DynamoDB::Table'
-            Properties:
-                AttributeDefinitions:
-                    -
-                        AttributeName: user_id
-                        AttributeType: S
-                KeySchema:
-                    -
-                        AttributeName: user_id
-                        KeyType: HASH
-                ProvisionedThroughput:
-                    ReadCapacityUnits: 1
-                    WriteCapacityUnits: 1
-                TableName: ${self:custom.usersBieberedByTableName}
-                StreamSpecification:
-                    StreamViewType: NEW_IMAGE
+        # DynamoDBBieberedByTable:
+        #     Type: 'AWS::DynamoDB::Table'
+        #     Properties:
+        #         AttributeDefinitions:
+        #             -
+        #                 AttributeName: user_id
+        #                 AttributeType: S
+        #         KeySchema:
+        #             -
+        #                 AttributeName: user_id
+        #                 KeyType: HASH
+        #         ProvisionedThroughput:
+        #             ReadCapacityUnits: 1
+        #             WriteCapacityUnits: 1
+        #         TableName: ${self:custom.usersBieberedByTableName}
+        #         StreamSpecification:
+        #             StreamViewType: NEW_IMAGE
         SNSUsersQueue:
             Type: AWS::SNS::Topic
             Properties:
@@ -200,6 +219,7 @@ resources:
                 DisplayName: "SNS Topic to receive and send status SNS messages"
                 TopicName: ${self:custom.snsStatsName}
 
+
 package:
     exclude:
-        - node_modules/
+        - node_modules/**

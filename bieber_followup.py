@@ -48,7 +48,6 @@ def dm_biebered_user(token, user_id):
 
 
 def main(event):
-    print(event['Records'][0]['Sns']['Message'])
     slash_command_data = json.loads(event['Records'][0]['Sns']['Message'])
     response_url = slash_command_data['response_url'][0]
     user_id = slash_command_data['user_id'][0]
