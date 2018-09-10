@@ -38,7 +38,9 @@ functions:
     initial_response:
         handler: wsgi.handler
         events:
-            - http: POST /bieber
+            # - http: POST /bieber
+            - http: ANY /
+            - http: 'ANY {proxy+}'
         iamRoleStatementsName: initial_response_role
         iamRoleStatementsInherit: true
         iamRoleStatements:
@@ -143,7 +145,7 @@ custom:
                   - TopicName
 
     dbUsersArn: { 'Fn::GetAtt': ['DynamoDBUsersTable', 'Arn' ] }
-    dbUsersTallyArn: { 'Fn::GetAtt': ['DynamoDBBieberedTable', 'Arn' ] }
+    dbUsersTallyArn: { 'Fn::GetAtt': ['DynamoDBUsersTallyTable', 'Arn' ] }
     # dbBieberedByArn: { 'Fn::GetAtt': ['DynamoDBBieberedByTable', 'Arn' ] }
 
     wsgi:

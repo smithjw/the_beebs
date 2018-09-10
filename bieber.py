@@ -4,7 +4,8 @@ import boto3
 import json
 import re
 
-from flask import abort, Flask, jsonify, request
+from flask import abort, Flask, jsonify, request, Response
+from slackclient import SlackClient
 
 app = Flask(__name__)
 
@@ -43,7 +44,78 @@ def publish_to_sns(slash_command_response, sns_arn):
         TopicArn=sns_arn,
         Message=slash_command_response
     )
-    print("Response: {}".format(response))
+    print('Response: {}'.format(response))
+
+def help_comment(response_url):
+    data = {
+        'response_type': 'ephemeral',
+        'text': 'Here\'s what I can do!',
+        'attachments': [
+            {
+                'fallback': 'Hmmm, this is a fallback message',
+                'color': '#f04c5d',
+                'title': 'Supported Bieber Commands',
+                'mrkdwn_in': ['fields'],
+                'fields': [
+                    {
+                        'title': 'Help',
+                        'value': 'Will display the supported commands'
+                    },
+                    {
+                        'title': 'Bieber',
+                        'value': '`/bieber @username` will bieber the Camper and give a point to @username'
+                    },
+                    {
+                        'title': 'Stats',
+                        'value': '`/bieber stats` will display the leaderboard'
+                    }
+                ]
+            }
+        ]
+    }
+
+    requests.post(response_url, json=data)
+
+# Need to fetch these from Parameter Store
+# client_id = getParameter('SLACK_CLIENT_ID')
+# client_secret = getParameter('SLACK_CLIENT_SECRET')
+# oauth_scope = getParameter('SLACK_BOT_SCOPE')
+
+
+@app.route('/begin_auth', methods=['GET'])
+def pre_install():
+    return '''
+        <a href="https://slack.com/oauth/authorize?scope=incoming-webhook,commands,bot&client_id=7627545351.425890268918"><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a>
+    '''.format(oauth_scope, client_id)
+
+
+@app.route('/finish_auth', methods=['GET', 'POST'])
+def post_install():
+
+    # Retrieve the auth code from the request params
+    auth_code = request.args['code']
+
+    # An empty string is a valid token for this request
+    sc = SlackClient('')
+
+    # Request the auth tokens from Slack
+    auth_response = sc.api_call(
+        'oauth.access',
+        client_id=client_id,
+        client_secret=client_secret,
+        code=auth_code
+    )
+
+    # Save the bot token to an environmental variable or to your data store
+    # for later use
+    os.environ['SLACK_USER_TOKEN'] = auth_response['access_token']
+    os.environ['SLACK_BOT_TOKEN'] = auth_response['bot']['bot_access_token']
+
+    print(auth_code)
+
+    # Don't forget to let the user know that auth has succeeded!
+    return 'Auth complete!'
+
 
 @app.route('/bieber', methods=['POST'])
 def bieber():
@@ -77,11 +149,14 @@ def bieber():
             )
 
     elif any(re.findall(r'help', text, re.IGNORECASE)):
-        return jsonify(
-            response_type = 'ephemeral',
-            text = 'Here\'s what I can do!'
-            # I should put a Slack Attachment in here
-        )
+        response_url = slash_command_response['response_url'][0]
+        help_comment(response_url)
+
+        # return jsonify(
+        #     response_type = 'ephemeral'
+        # )
+
+        return Response()
 
     else:
         return jsonify(
