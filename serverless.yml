@@ -32,6 +32,7 @@ provider:
         # biebered_by_table_name: ${self:custom.usersBieberedByTableName}
         biebered_sns_arn: ${self:custom.snsBieberedArn}
         stats_sns_arn: ${self:custom.snsStatsArn}
+        region: 'us-east-1'
 
 
 functions:

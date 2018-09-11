@@ -127,16 +127,10 @@ def bieber():
     text = slash_command_response['text'][0]
 
     if any(re.findall(r'stat', text, re.IGNORECASE)):
-        # Can this be replaced with an Env Var from the serverless.yml file?
         sns_arn = os.environ['stats_sns_arn']
+        publish_to_sns(sns_message, sns_arn)
 
-        # Ucomment this when additional function is written to pull stats from DynamoDB
-        # publish_to_sns(sns_message, sns_arn)
-
-        return jsonify(
-            response_type = 'in_channel',
-            text = 'Here are the stats for the most Biebered individual:',
-            )
+        return Response()
 
     elif any(re.findall(r'<@U', text, re.IGNORECASE)):
         sns_arn = os.environ['biebered_sns_arn']
@@ -151,10 +145,6 @@ def bieber():
     elif any(re.findall(r'help', text, re.IGNORECASE)):
         response_url = slash_command_response['response_url'][0]
         help_comment(response_url)
-
-        # return jsonify(
-        #     response_type = 'ephemeral'
-        # )
 
         return Response()
 
