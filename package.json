@@ -3,7 +3,8 @@
   "description": "",
   "version": "0.1.0",
   "dependencies": {
-    "serverless": "^1.30.3"
+    "serverless": "^1.30.3",
+    "serverless-plugin-dynamodb-autoscaling": "^2.2.0"
   },
   "devDependencies": {
     "serverless-iam-roles-per-function": "^1.0.4",

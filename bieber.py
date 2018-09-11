@@ -76,6 +76,27 @@ def help_comment(response_url):
 
     requests.post(response_url, json=data)
 
+def initial_comment(response_url, user_id):
+    data = {
+        'text': f'You\'ve just Biebered <@{user_id}>\'s Mac! Clicking the button below will Bieberify the Desktop and Lock the Screen',
+        'response_type': 'ephemeral',
+        'attachments': [
+            {
+                'fallback': 'Click here to Bieberfy my Mac <jamfselfservice://content?entity=policy&id=337&action=execute|click here>',
+                'actions': [
+                    {
+                        'type': 'button',
+                        'text': 'Bieberify this Mac',
+                        'url': 'jamfselfservice://content?entity=policy&id=337&action=execute',
+                        'style': 'danger'
+                    }
+                ]
+            }
+        ]
+    }
+
+    requests.post(response_url, json=data)
+
 # Need to fetch these from Parameter Store
 # client_id = getParameter('SLACK_CLIENT_ID')
 # client_secret = getParameter('SLACK_CLIENT_SECRET')
@@ -85,7 +106,7 @@ def help_comment(response_url):
 @app.route('/begin_auth', methods=['GET'])
 def pre_install():
     return '''
-        <a href="https://slack.com/oauth/authorize?scope=incoming-webhook,commands,bot&client_id=7627545351.425890268918"><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a>
+        <a href='https://slack.com/oauth/authorize?scope=incoming-webhook,commands,bot&client_id=7627545351.425890268918'><img alt='Add to Slack' height='40' width='139' src='https://platform.slack-edge.com/img/add_to_slack.png' srcset='https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x' /></a>
     '''.format(oauth_scope, client_id)
 
 
@@ -123,6 +144,8 @@ def bieber():
         abort(400)
 
     slash_command_response = request.form.to_dict(flat=False)
+    response_url = slash_command_response['response_url'][0]
+    user_id = slash_command_response['user_id'][0]
     sns_message = json.dumps(slash_command_response)
     text = slash_command_response['text'][0]
 
@@ -135,15 +158,12 @@ def bieber():
     elif any(re.findall(r'<@U', text, re.IGNORECASE)):
         sns_arn = os.environ['biebered_sns_arn']
         publish_to_sns(sns_message, sns_arn)
+        initial_comment(response_url, user_id)
 
         # Should turn the link in the following message into a Slack Button
-        return jsonify(
-            response_type='ephemeral',
-            text='You\'ve just Biebered me! To add insult to injury, <jamfselfservice://content?entity=policy&id=337&action=execute|click here> :smiling_imp:',
-            )
+        return Response()
 
     elif any(re.findall(r'help', text, re.IGNORECASE)):
-        response_url = slash_command_response['response_url'][0]
         help_comment(response_url)
 
         return Response()

@@ -53,7 +53,7 @@ def main(event):
     user_id = slash_command_data['user_id'][0]
     token = getParameter('PA_SLACK_BOT_TOKEN')
 
-    bieber_comment(response_url)
+    # bieber_comment(response_url)
     dm_biebered_user(token, user_id)
 
 

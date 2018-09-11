@@ -37,8 +37,9 @@ def get_top_biebered_others_users():
     return
 
 def biebered_self_stats_comment(response_url):
+    # The leaderboard for Campers biebering others will be posted to the channel
     data = {
-        'response_type': 'ephemeral',
+        'response_type': 'in_channel',
         'text': 'Here\'s the leaderboard for Campers being Biebered:',
         'attachments': [
             {
@@ -61,6 +62,7 @@ def biebered_self_stats_comment(response_url):
     return response
 
 def biebered_others_stats_comment(response_url):
+    # The leaderboard for Campers being Beibered will only display to the user running the command
     data = {
         'response_type': 'ephemeral',
         'text': 'Here\'s the leaderboard for Campers who have Biebered the most people:',

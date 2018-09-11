@@ -29,7 +29,6 @@ provider:
     environment:
         users_table_name: ${self:custom.usersTableName}
         users_tally_table_name: ${self:custom.usersTallyTableName}
-        # biebered_by_table_name: ${self:custom.usersBieberedByTableName}
         biebered_sns_arn: ${self:custom.snsBieberedArn}
         stats_sns_arn: ${self:custom.snsStatsArn}
         region: 'us-east-1'
@@ -39,7 +38,6 @@ functions:
     initial_response:
         handler: wsgi.handler
         events:
-            # - http: POST /bieber
             - http: ANY /
             - http: 'ANY {proxy+}'
         iamRoleStatementsName: initial_response_role
@@ -80,7 +78,6 @@ functions:
               Resource:
                 - ${self:custom.dbUsersArn}
                 - ${self:custom.dbUsersTallyArn}
-                # - ${self:custom.dbBieberedByArn}
     tally_db:
         handler: tally_db.lambda_func
         events:
@@ -107,13 +104,13 @@ functions:
               Resource:
                 - ${self:custom.dbUsersArn}
                 - ${self:custom.dbUsersTallyArn}
-                # - ${self:custom.dbBieberedByArn}
 
 
 plugins:
   - serverless-python-requirements
   - serverless-wsgi
   - serverless-iam-roles-per-function
+  - serverless-plugin-dynamodb-autoscaling
 
 
 custom:
@@ -147,7 +144,6 @@ custom:
 
     dbUsersArn: { 'Fn::GetAtt': ['DynamoDBUsersTable', 'Arn' ] }
     dbUsersTallyArn: { 'Fn::GetAtt': ['DynamoDBUsersTallyTable', 'Arn' ] }
-    # dbBieberedByArn: { 'Fn::GetAtt': ['DynamoDBBieberedByTable', 'Arn' ] }
 
     wsgi:
         app: bieber.app
@@ -194,23 +190,6 @@ resources:
                 TableName: ${self:custom.usersTallyTableName}
                 StreamSpecification:
                     StreamViewType: NEW_IMAGE
-        # DynamoDBBieberedByTable:
-        #     Type: 'AWS::DynamoDB::Table'
-        #     Properties:
-        #         AttributeDefinitions:
-        #             -
-        #                 AttributeName: user_id
-        #                 AttributeType: S
-        #         KeySchema:
-        #             -
-        #                 AttributeName: user_id
-        #                 KeyType: HASH
-        #         ProvisionedThroughput:
-        #             ReadCapacityUnits: 1
-        #             WriteCapacityUnits: 1
-        #         TableName: ${self:custom.usersBieberedByTableName}
-        #         StreamSpecification:
-        #             StreamViewType: NEW_IMAGE
         SNSUsersQueue:
             Type: AWS::SNS::Topic
             Properties:
