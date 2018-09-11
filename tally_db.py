@@ -86,10 +86,12 @@ def get_latest_date(dates_data):
 
 def biebered_self(event, table):
     # Let's try to create the User record first
-    user_id = event['Records'][0]['dynamodb']['NewImage']['user_id']['S']
-    uid_first = event['Records'][0]['dynamodb']['NewImage']['uid_first']['S']
-    uid_last = event['Records'][0]['dynamodb']['NewImage']['uid_last']['S']
-    uid_email = event['Records'][0]['dynamodb']['NewImage']['uid_email']['S']
+    print(event['Records'][0]['dynamodb']['NewImage'])
+
+    user_id = event['Records'][0]['dynamodb']['NewImage']['user_id'].get('S', 'Unknown')
+    uid_first = event['Records'][0]['dynamodb']['NewImage']['uid_first'].get('S', 'Unknown')
+    uid_last = event['Records'][0]['dynamodb']['NewImage']['uid_last'].get('S', 'Unknown')
+    uid_email = event['Records'][0]['dynamodb']['NewImage']['uid_email'].get('S', 'Unknown')
 
     create_user_record(table, user_id, uid_first, uid_last, uid_email)
 
@@ -107,10 +109,10 @@ def biebered_others(event, table):
     data = event['Records'][0]['dynamodb']['NewImage']['biebered_by']['M'][latest_date]
 
     # Let's try to create the User record first
-    user_id = data['M']['user_id']['S']
-    uid_first = data['M']['first_name']['S']
-    uid_last = data['M']['last_name']['S']
-    uid_email = data['M']['email']['S']
+    user_id = data['M']['user_id'].get('S', 'Unknown')
+    uid_first = data['M']['first_name'].get('S', 'Unknown')
+    uid_last = data['M']['last_name'].get('S', 'Unknown')
+    uid_email = data['M']['email'].get('S', 'Unknown')
     print(user_id, uid_first, uid_last, uid_email)
 
     create_user_record(table, user_id, uid_first, uid_last, uid_email)
