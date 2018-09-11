@@ -30,61 +30,97 @@ def get_table(table_name, region):
 
     return table
 
-def get_top_biebered_self_users():
-    return
+def get_top_biebered_self_users(items):
+    items_sorted = sorted(items["Items"], key=lambda d: d["biebered_self_count"], reverse=True)
 
-def get_top_biebered_others_users():
-    return
+    return items_sorted
 
-def biebered_self_stats_comment(response_url):
+def get_top_biebered_others_users(items):
+    items_sorted = sorted(items["Items"], key=lambda d: d["biebered_others_count"], reverse=True)
+
+    return items_sorted
+
+def biebered_self_stats_comment(response_url, stats):
     # The leaderboard for Campers biebering others will be posted to the channel
-    data = {
-        'response_type': 'in_channel',
-        'text': 'Here\'s the leaderboard for Campers being Biebered:',
-        'attachments': [
-            {
-                'fallback': 'Hmmm, this is a fallback message',
-                'color': '#f04c5d',
-                'title': 'Title',
-                'mrkdwn_in': ['fields'],
-                'fields': [
-                    {
-                        'title': 'Field title',
-                        'value': 'Field Value'
-                    }
-                ]
-            }
-        ]
-    }
+    if len(stats) > 4:
+        data = {
+            'response_type': 'ephemeral',
+            'text': 'Here\'s the failboard for Campers being Biebered:',
+            'attachments': [
+                {
+                    'fallback': 'Hmmm, this is a fallback message',
+                    'color': '#f04c5d',
+                    'title': 'Failboard',
+                    'mrkdwn_in': ['fields'],
+                    'fields': [
+                        {
+                            'title': f'{stats[0]["uid_first"]} {stats[0]["uid_last"]}',
+                            'value': f'Total times Biebered: {stats[0]["biebered_self_count"]}'
+                        },{
+                            'title': f'{stats[1]["uid_first"]} {stats[1]["uid_last"]}',
+                            'value': f'Total times Biebered: {stats[1]["biebered_self_count"]}'
+                        },{
+                            'title': f'{stats[2]["uid_first"]} {stats[2]["uid_last"]}',
+                            'value': f'Total times Biebered: {stats[2]["biebered_self_count"]}'
+                        },{
+                            'title': f'{stats[3]["uid_first"]} {stats[3]["uid_last"]}',
+                            'value': f'Total times Biebered: {stats[3]["biebered_self_count"]}'
+                        },{
+                            'title': f'{stats[4]["uid_first"]} {stats[4]["uid_last"]}',
+                            'value': f'Total times Biebered: {stats[4]["biebered_self_count"]}'
+                        }
+                    ]
+                }
+            ]
+        }
+
+    else:
+        data = {
+            'response_type': 'ephemeral',
+            'text': 'There aren\'t enough results to display the leaderboard just yet. Please cherck again soon'
+        }
 
     response = requests.post(response_url, json=data)
 
     return response
 
-def biebered_others_stats_comment(response_url):
+def biebered_others_stats_comment(response_url, stats):
     # The leaderboard for Campers being Beibered will only display to the user running the command
-    data = {
-        'response_type': 'ephemeral',
-        'text': 'Here\'s the leaderboard for Campers who have Biebered the most people:',
-        'attachments': [
-            {
-                'fallback': 'Hmmm, this is a fallback message',
-                'color': '#45ad8f',
-                'title': 'Title',
-                'mrkdwn_in': ['fields'],
-                'fields': [
-                    {
-                        'title': 'Field title',
-                        'value': 'Field Value'
-                    }
-                ]
-            }
-        ]
-    }
+    if len(stats) > 4:
+        data = {
+            'response_type': 'in_channel',
+            'text': 'Here\'s the leaderboard for Campers who have Biebered the most people:',
+            'attachments': [
+                {
+                    'fallback': 'Hmmm, this is a fallback message',
+                    'color': '#45ad8f',
+                    'title': 'Leaderboard',
+                    'mrkdwn_in': ['fields'],
+                    'fields': [
+                        {
+                            'title': f'{stats[0]["uid_first"]} {stats[0]["uid_last"]}',
+                            'value': f'Total times Biebered: {stats[0]["biebered_others_count"]}'
+                        },{
+                            'title': f'{stats[1]["uid_first"]} {stats[1]["uid_last"]}',
+                            'value': f'Total times Biebered: {stats[1]["biebered_others_count"]}'
+                        },{
+                            'title': f'{stats[2]["uid_first"]} {stats[2]["uid_last"]}',
+                            'value': f'Total times Biebered: {stats[2]["biebered_others_count"]}'
+                        },{
+                            'title': f'{stats[3]["uid_first"]} {stats[3]["uid_last"]}',
+                            'value': f'Total times Biebered: {stats[3]["biebered_others_count"]}'
+                        },{
+                            'title': f'{stats[4]["uid_first"]} {stats[4]["uid_last"]}',
+                            'value': f'Total times Biebered: {stats[4]["biebered_others_count"]}'
+                        }
+                    ]
+                }
+            ]
+        }
 
-    response = requests.post(response_url, json=data)
+        response = requests.post(response_url, json=data)
 
-    return response
+        return response
 
 
 def main(message):
@@ -92,9 +128,12 @@ def main(message):
     response_url = message['response_url'][0]
     token = getParameter('PA_SLACK_BOT_TOKEN')
     table = get_table(table_name, region)
+    items = table.scan()
+    self_stats = get_top_biebered_self_users(items)
+    others_stats = get_top_biebered_others_users(items)
 
-    biebered_self_stats_comment(response_url)
-    biebered_others_stats_comment(response_url)
+    biebered_self_stats_comment(response_url, self_stats)
+    biebered_others_stats_comment(response_url, others_stats)
 
 
 def lambda_func(event, context):

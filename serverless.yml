@@ -57,6 +57,14 @@ functions:
         handler: bieber_stats.lambda_func
         events:
             - sns: arn:aws:sns:${self:provider.region}:465039758259:${self:custom.snsStatsName}
+        iamRoleStatementsName: get_stats_role
+        iamRoleStatementsInherit: true
+        iamRoleStatements:
+            - Effect: Allow
+              Action:
+                - dynamodb:Scan
+              Resource:
+                - ${self:custom.dbUsersTallyArn}
     update_db:
         handler: update_db.lambda_func
         events:
@@ -66,18 +74,10 @@ functions:
         iamRoleStatements:
             - Effect: Allow
               Action:
-                - dynamodb:Query
-                - dynamodb:Scan
-                - dynamodb:GetItem
                 - dynamodb:PutItem
                 - dynamodb:UpdateItem
-                - dynamodb:DescribeStream
-                - dynamodb:GetRecords
-                - dynamodb:GetShardIterator
-                - dynamodb:ListStreams
               Resource:
                 - ${self:custom.dbUsersArn}
-                - ${self:custom.dbUsersTallyArn}
     tally_db:
         handler: tally_db.lambda_func
         events:
@@ -92,17 +92,9 @@ functions:
         iamRoleStatements:
             - Effect: Allow
               Action:
-                - dynamodb:Query
-                - dynamodb:Scan
-                - dynamodb:GetItem
                 - dynamodb:PutItem
                 - dynamodb:UpdateItem
-                - dynamodb:DescribeStream
-                - dynamodb:GetRecords
-                - dynamodb:GetShardIterator
-                - dynamodb:ListStreams
               Resource:
-                - ${self:custom.dbUsersArn}
                 - ${self:custom.dbUsersTallyArn}
 
 
