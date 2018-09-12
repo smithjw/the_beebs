@@ -114,49 +114,6 @@ def biebered_stats_comment(response_url, self_stats, other_stats):
 
     return response
 
-def biebered_others_stats_comment(response_url, stats):
-    # The leaderboard for Campers being Beibered will only display to the user running the command
-    if len(stats) > 4:
-        data = {
-            'response_type': 'in_channel',
-            'text': 'Here\'s the leaderboard for Campers who have Biebered the most people:',
-            'attachments': [
-                {
-                    'fallback': 'Hmmm, this is a fallback message',
-                    'color': '#45ad8f',
-                    'title': 'Leaderboard',
-                    'mrkdwn_in': ['fields'],
-                    'fields': [
-                        {
-                            'title': f'{other_stats[0]["uid_first"]} {other_stats[0]["uid_last"]}',
-                            'value': f'Total times Biebering others: {other_stats[0]["biebered_others_count"]}',
-                            'short': True
-                        },{
-                            'title': f'{other_stats[1]["uid_first"]} {other_stats[1]["uid_last"]}',
-                            'value': f'Total times Biebering others: {other_stats[1]["biebered_others_count"]}',
-                            'short': True
-                        },{
-                            'title': f'{other_stats[2]["uid_first"]} {other_stats[2]["uid_last"]}',
-                            'value': f'Total times Biebering others: {other_stats[2]["biebered_others_count"]}',
-                            'short': True
-                        },{
-                            'title': f'{other_stats[3]["uid_first"]} {other_stats[3]["uid_last"]}',
-                            'value': f'Total times Biebering others: {other_stats[3]["biebered_others_count"]}',
-                            'short': True
-                        },{
-                            'title': f'{other_stats[4]["uid_first"]} {other_stats[4]["uid_last"]}',
-                            'value': f'Total times Biebering others: {other_stats[4]["biebered_others_count"]}',
-                            'short': True
-                        }
-                    ]
-                }
-            ]
-        }
-
-        response = requests.post(response_url, json=data)
-
-        return response
-
 
 def main(message):
     table_name = os.environ['users_tally_table_name']
@@ -168,7 +125,6 @@ def main(message):
     others_stats = get_top_biebered_others_users(items)
 
     biebered_stats_comment(response_url, self_stats, others_stats)
-    # biebered_others_stats_comment(response_url, others_stats)
 
 
 def lambda_func(event, context):
