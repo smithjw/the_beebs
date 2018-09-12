@@ -75,10 +75,13 @@ def update_user_record(table, user_id, update_item):
 
 def get_latest_date(dates_data):
     dates = []
+    print(dates)
     for key in dates_data:
         dates.append(key)
+        print(dates)
 
     dates_sorted = sorted(dates, reverse=True)
+    print(dates_sorted)
     latest_date = dates_sorted[0]
 
     return latest_date
@@ -103,6 +106,7 @@ def biebered_self(event, table):
 
 
 def biebered_others(event, table):
+    print(event)
     biebered_others_count = None
     dates_data = event['Records'][0]['dynamodb']['NewImage']['biebered_by']['M']
     latest_date = get_latest_date(dates_data)
