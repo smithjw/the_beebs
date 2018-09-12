@@ -62,7 +62,16 @@ functions:
         iamRoleStatements:
             - Effect: Allow
               Action:
+                - dynamodb:Query
                 - dynamodb:Scan
+                - dynamodb:GetItem
+                - dynamodb:PutItem
+                - dynamodb:UpdateItem
+                - dynamodb:DeleteItem
+                - dynamodb:DescribeStream
+                - dynamodb:GetRecords
+                - dynamodb:GetShardIterator
+                - dynamodb:ListStreams
               Resource:
                 - ${self:custom.dbUsersTallyArn}
     update_db:
@@ -74,10 +83,19 @@ functions:
         iamRoleStatements:
             - Effect: Allow
               Action:
+                - dynamodb:Query
+                - dynamodb:Scan
+                - dynamodb:GetItem
                 - dynamodb:PutItem
                 - dynamodb:UpdateItem
+                - dynamodb:DeleteItem
+                - dynamodb:DescribeStream
+                - dynamodb:GetRecords
+                - dynamodb:GetShardIterator
+                - dynamodb:ListStreams
               Resource:
                 - ${self:custom.dbUsersArn}
+                - ${self:custom.dbUsersTallyArn}
     tally_db:
         handler: tally_db.lambda_func
         events:
@@ -92,10 +110,19 @@ functions:
         iamRoleStatements:
             - Effect: Allow
               Action:
+                - dynamodb:Query
+                - dynamodb:Scan
+                - dynamodb:GetItem
                 - dynamodb:PutItem
                 - dynamodb:UpdateItem
+                - dynamodb:DeleteItem
+                - dynamodb:DescribeStream
+                - dynamodb:GetRecords
+                - dynamodb:GetShardIterator
+                - dynamodb:ListStreams
               Resource:
                 - ${self:custom.dbUsersTallyArn}
+                - ${self:custom.dbUsersArn}
 
 
 plugins:
@@ -160,8 +187,8 @@ resources:
                         AttributeName: user_id
                         KeyType: HASH
                 ProvisionedThroughput:
-                    ReadCapacityUnits: 1
-                    WriteCapacityUnits: 1
+                    ReadCapacityUnits: 10
+                    WriteCapacityUnits: 10
                 TableName: ${self:custom.usersTableName}
                 StreamSpecification:
                     StreamViewType: NEW_IMAGE
@@ -177,11 +204,9 @@ resources:
                         AttributeName: user_id
                         KeyType: HASH
                 ProvisionedThroughput:
-                    ReadCapacityUnits: 1
-                    WriteCapacityUnits: 1
+                    ReadCapacityUnits: 10
+                    WriteCapacityUnits: 10
                 TableName: ${self:custom.usersTallyTableName}
-                StreamSpecification:
-                    StreamViewType: NEW_IMAGE
         SNSUsersQueue:
             Type: AWS::SNS::Topic
             Properties:

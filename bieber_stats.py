@@ -60,43 +60,43 @@ def biebered_stats_comment(response_url, self_stats, other_stats):
                             'short': True
                         },{
                             'title': f'{other_stats[0]["uid_first"]} {other_stats[0]["uid_last"]}',
-                            'value': f'Total times Biebering others: {other_stats[0]["biebered_others_count"]}',
+                            'value': f'Total times Biebering others: `{other_stats[0]["biebered_others_count"]}`',
                             'short': True
                         },{
                             'title': f'{self_stats[0]["uid_first"]} {self_stats[0]["uid_last"]}',
-                            'value': f'Total times Biebered: {self_stats[0]["biebered_self_count"]}',
+                            'value': f'Total times Biebered: `{self_stats[0]["biebered_self_count"]}`',
                             'short': True
                         },{
                             'title': f'{other_stats[1]["uid_first"]} {other_stats[1]["uid_last"]}',
-                            'value': f'Total times Biebering others: {other_stats[1]["biebered_others_count"]}',
+                            'value': f'Total times Biebering others: `{other_stats[1]["biebered_others_count"]}`',
                             'short': True
                         },{
                             'title': f'{self_stats[1]["uid_first"]} {self_stats[1]["uid_last"]}',
-                            'value': f'Total times Biebered: {self_stats[1]["biebered_self_count"]}',
+                            'value': f'Total times Biebered: `{self_stats[1]["biebered_self_count"]}`',
                             'short': True
                         },{
                             'title': f'{other_stats[2]["uid_first"]} {other_stats[2]["uid_last"]}',
-                            'value': f'Total times Biebering others: {other_stats[2]["biebered_others_count"]}',
+                            'value': f'Total times Biebering others: `{other_stats[2]["biebered_others_count"]}`',
                             'short': True
                         },{
                             'title': f'{self_stats[2]["uid_first"]} {self_stats[2]["uid_last"]}',
-                            'value': f'Total times Biebered: {self_stats[2]["biebered_self_count"]}',
+                            'value': f'Total times Biebered: `{self_stats[2]["biebered_self_count"]}`',
                             'short': True
                         },{
                             'title': f'{other_stats[3]["uid_first"]} {other_stats[3]["uid_last"]}',
-                            'value': f'Total times Biebering others: {other_stats[3]["biebered_others_count"]}',
+                            'value': f'Total times Biebering others: `{other_stats[3]["biebered_others_count"]}`',
                             'short': True
                         },{
                             'title': f'{self_stats[3]["uid_first"]} {self_stats[3]["uid_last"]}',
-                            'value': f'Total times Biebered: {self_stats[3]["biebered_self_count"]}',
+                            'value': f'Total times Biebered: `{self_stats[3]["biebered_self_count"]}`',
                             'short': True
                         },{
                             'title': f'{other_stats[4]["uid_first"]} {other_stats[4]["uid_last"]}',
-                            'value': f'Total times Biebering others: {other_stats[4]["biebered_others_count"]}',
+                            'value': f'Total times Biebering others: `{other_stats[4]["biebered_others_count"]}`',
                             'short': True
                         },{
                             'title': f'{self_stats[4]["uid_first"]} {self_stats[4]["uid_last"]}',
-                            'value': f'Total times Biebered: {self_stats[4]["biebered_self_count"]}',
+                            'value': f'Total times Biebered: `{self_stats[4]["biebered_self_count"]}`',
                             'short': True
                         }
                     ]

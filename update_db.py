@@ -53,10 +53,11 @@ def create_user_item(table, timestamp, user_id, uid_first, uid_last, uid_email):
             },
             ConditionExpression = 'attribute_not_exists(user_id)'
         )
+        print(f'Creating Item with ID: {user_id}')
     except ClientError as e:
         error_code = e.response['Error']['Code']
         if error_code == 'ConditionalCheckFailedException':
-            print(f'User already exists, updating ID: {user_id}')
+            print(f'User already exists, moving on')
         else:
             print(f'Unexpected error: {error_code}')
 
@@ -70,9 +71,9 @@ def write_db_data(timestamp, user_id_info, biebered_by_info):
 
     # Replace these with .get just in case user doesn't have these items filled in
     user_id = user_id_info['user']['id']
-    uid_first = user_id_info['user']['profile'].get('first_name', None)
-    uid_last = user_id_info['user']['profile'].get('last_name', None)
-    uid_email = user_id_info['user']['profile'].get('email', None)
+    uid_first = user_id_info['user']['profile'].get('first_name', 'Unknown')
+    uid_last = user_id_info['user']['profile'].get('last_name', 'Unknown')
+    uid_email = user_id_info['user']['profile'].get('email', 'Unknown')
 
 
     # Info about the user that did the Biebering
@@ -80,11 +81,11 @@ def write_db_data(timestamp, user_id_info, biebered_by_info):
     # Replace these with .get just in case user doesn't have these items filled in
     # Need to add in checks for if no user is passed
     biebered_by_id = biebered_by_info['user']['id']
-    bb_first = biebered_by_info['user']['profile'].get('first_name', None)
-    bb_last = biebered_by_info['user']['profile'].get('last_name', None)
-    bb_email = biebered_by_info['user']['profile'].get('email', None)
+    bb_first = biebered_by_info['user']['profile'].get('first_name', 'Unknown')
+    bb_last = biebered_by_info['user']['profile'].get('last_name', 'Unknown')
+    bb_email = biebered_by_info['user']['profile'].get('email', 'Unknown')
 
-    print(f'Creating Item with ID: {user_id} if it doesn\'t already exist')
+    print(f'Checking for Item with ID: {user_id}')
     create_user_item(table, timestamp, user_id, uid_first, uid_last, uid_email)
 
     response = table.update_item(
@@ -103,6 +104,7 @@ def write_db_data(timestamp, user_id_info, biebered_by_info):
             }
         }
     )
+    print('Updating Item now')
 
     return response
 
