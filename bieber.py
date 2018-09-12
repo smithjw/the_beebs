@@ -46,10 +46,10 @@ def publish_to_sns(slash_command_response, sns_arn):
     )
     print('Response: {}'.format(response))
 
-def help_comment(response_url):
+def help_comment(response_url, comment_text):
     data = {
         'response_type': 'ephemeral',
-        'text': 'Here\'s what I can do!',
+        'text': comment_text,
         'attachments': [
             {
                 'fallback': 'Hmmm, this is a fallback message',
@@ -164,13 +164,12 @@ def bieber():
         return Response()
 
     elif any(re.findall(r'help', text, re.IGNORECASE)):
-        help_comment(response_url)
+        comment_text = 'Here\'s what I can do!'
+        help_comment(response_url, comment_text)
 
         return Response()
 
     else:
-        return jsonify(
-            response_type = 'ephemeral',
-            text = 'That\'s not a valid command, try `/bieber help`'
-            # I should put a Slack Attachment in here
-        )
+        comment_text = 'Hmmm, I don\'t recognise that command. Here are some handy hints!'
+        help_comment(response_url, comment_text)
+        return Response()

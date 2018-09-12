@@ -45,7 +45,7 @@ def biebered_stats_comment(response_url, self_stats, other_stats):
     if len(self_stats) > 4 and len(other_stats) > 4:
         data = {
             'response_type': 'ephemeral',
-            'text': 'Here are the leaderboards for Campers Biebering other and being Biebered:',
+            'text': 'Here are the leaderboards for Campers being Biebered and Biebering others:',
             'attachments': [
                 {
                     'fallback': 'Hmmm, this is a fallback message',
