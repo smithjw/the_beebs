@@ -6,6 +6,7 @@ import re
 from botocore.exceptions import ClientError
 from slackclient import SlackClient
 
+
 def getParameter(param_name):
     # Create the SSM Client
     ssm = boto3.client(
@@ -28,8 +29,8 @@ def get_user_info(user_id):
     sc = SlackClient(slack_token)
 
     user_info = sc.api_call(
-      'users.info',
-      user=user_id
+        'users.info',
+        user=user_id
     )
 
     return user_info
@@ -44,14 +45,14 @@ def extract_user_id(text):
 def create_user_item(table, timestamp, user_id, uid_first, uid_last, uid_email):
     try:
         table.put_item(
-            Item = {
+            Item={
                 'user_id': user_id,
                 'biebered_by': {},
                 'uid_first': uid_first,
                 'uid_last': uid_last,
                 'uid_email': uid_email
             },
-            ConditionExpression = 'attribute_not_exists(user_id)'
+            ConditionExpression='attribute_not_exists(user_id)'
         )
         print(f'Creating Item with ID: {user_id}')
     except ClientError as e:
@@ -75,7 +76,6 @@ def write_db_data(timestamp, user_id_info, biebered_by_info):
     uid_last = user_id_info['user']['profile'].get('last_name', 'Unknown')
     uid_email = user_id_info['user']['profile'].get('email', 'Unknown')
 
-
     # Info about the user that did the Biebering
 
     # Replace these with .get just in case user doesn't have these items filled in
@@ -90,12 +90,12 @@ def write_db_data(timestamp, user_id_info, biebered_by_info):
 
     response = table.update_item(
         Key={'user_id': user_id},
-        UpdateExpression = 'SET #bb.#ts = :update',
-        ExpressionAttributeNames = {
+        UpdateExpression='SET #bb.#ts = :update',
+        ExpressionAttributeNames={
             '#bb': 'biebered_by',
             '#ts': timestamp
         },
-        ExpressionAttributeValues = {
+        ExpressionAttributeValues={
             ":update": {
                 'user_id': biebered_by_id,
                 'first_name': bb_first,
@@ -129,6 +129,5 @@ if __name__ == '__main__':
         message = json_file.read()
     timestamp = '2018-09-11T04:13:39.960Z'
     test_message = json.loads(message)
-
 
     main(test_message, timestamp)

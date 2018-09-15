@@ -33,6 +33,7 @@ def bieber_comment(response_url):
 
     requests.post(response_url, json=data)
 
+
 def dm_biebered_user(token, user_id):
     sleep(1)
     sc = SlackClient(token)

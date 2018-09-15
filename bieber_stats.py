@@ -7,6 +7,7 @@ from slackclient import SlackClient
 
 region = os.environ['region']
 
+
 def getParameter(param_name):
 
     # Create the SSM Client
@@ -24,21 +25,25 @@ def getParameter(param_name):
 
     return credentials
 
+
 def get_table(table_name, region):
     dynamodb = boto3.resource('dynamodb', region_name=region)
     table = dynamodb.Table(table_name)
 
     return table
 
+
 def get_top_biebered_self_users(items):
     items_sorted = sorted(items["Items"], key=lambda d: d["biebered_self_count"], reverse=True)
 
     return items_sorted
 
+
 def get_top_biebered_others_users(items):
     items_sorted = sorted(items["Items"], key=lambda d: d["biebered_others_count"], reverse=True)
 
     return items_sorted
+
 
 def biebered_stats_comment(response_url, self_stats, other_stats):
     # The leaderboard for Campers biebering others will be posted to the channel
@@ -55,46 +60,46 @@ def biebered_stats_comment(response_url, self_stats, other_stats):
                         {
                             'title': 'Leaderboard',
                             'short': True
-                        },{
+                        }, {
                             'title': 'Failboard',
                             'short': True
-                        },{
+                        }, {
                             'title': f'{other_stats[0]["uid_first"]} {other_stats[0]["uid_last"]}',
                             'value': f'Total times Biebering others: `{other_stats[0]["biebered_others_count"]}`',
                             'short': True
-                        },{
+                        }, {
                             'title': f'{self_stats[0]["uid_first"]} {self_stats[0]["uid_last"]}',
                             'value': f'Total times Biebered: `{self_stats[0]["biebered_self_count"]}`',
                             'short': True
-                        },{
+                        }, {
                             'title': f'{other_stats[1]["uid_first"]} {other_stats[1]["uid_last"]}',
                             'value': f'Total times Biebering others: `{other_stats[1]["biebered_others_count"]}`',
                             'short': True
-                        },{
+                        }, {
                             'title': f'{self_stats[1]["uid_first"]} {self_stats[1]["uid_last"]}',
                             'value': f'Total times Biebered: `{self_stats[1]["biebered_self_count"]}`',
                             'short': True
-                        },{
+                        }, {
                             'title': f'{other_stats[2]["uid_first"]} {other_stats[2]["uid_last"]}',
                             'value': f'Total times Biebering others: `{other_stats[2]["biebered_others_count"]}`',
                             'short': True
-                        },{
+                        }, {
                             'title': f'{self_stats[2]["uid_first"]} {self_stats[2]["uid_last"]}',
                             'value': f'Total times Biebered: `{self_stats[2]["biebered_self_count"]}`',
                             'short': True
-                        },{
+                        }, {
                             'title': f'{other_stats[3]["uid_first"]} {other_stats[3]["uid_last"]}',
                             'value': f'Total times Biebering others: `{other_stats[3]["biebered_others_count"]}`',
                             'short': True
-                        },{
+                        }, {
                             'title': f'{self_stats[3]["uid_first"]} {self_stats[3]["uid_last"]}',
                             'value': f'Total times Biebered: `{self_stats[3]["biebered_self_count"]}`',
                             'short': True
-                        },{
+                        }, {
                             'title': f'{other_stats[4]["uid_first"]} {other_stats[4]["uid_last"]}',
                             'value': f'Total times Biebering others: `{other_stats[4]["biebered_others_count"]}`',
                             'short': True
-                        },{
+                        }, {
                             'title': f'{self_stats[4]["uid_first"]} {self_stats[4]["uid_last"]}',
                             'value': f'Total times Biebered: `{self_stats[4]["biebered_self_count"]}`',
                             'short': True

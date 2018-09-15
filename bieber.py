@@ -9,6 +9,7 @@ from slackclient import SlackClient
 
 app = Flask(__name__)
 
+
 def getParameter(param_name):
     # Create the SSM Client
     ssm = boto3.client(
@@ -25,6 +26,7 @@ def getParameter(param_name):
 
     return credentials
 
+
 def is_request_valid(request):
     token = getParameter('PA_SLACK_VERIFICATION_TOKEN')
     team_id = getParameter('PA_SLACK_TEAM_ID')
@@ -36,15 +38,18 @@ def is_request_valid(request):
     return is_token_valid and is_team_id_valid
 
 # Get the full response from the /command and send it into SNS
+
+
 def publish_to_sns(slash_command_response, sns_arn):
 
-    sns = boto3.client('sns',region_name='us-east-1')
+    sns = boto3.client('sns', region_name='us-east-1')
 
     response = sns.publish(
         TopicArn=sns_arn,
         Message=slash_command_response
     )
     print('Response: {}'.format(response))
+
 
 def help_comment(response_url, comment_text):
     data = {
@@ -75,6 +80,7 @@ def help_comment(response_url, comment_text):
     }
 
     requests.post(response_url, json=data)
+
 
 def initial_comment(response_url, user_id):
     data = {

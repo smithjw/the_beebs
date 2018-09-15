@@ -5,6 +5,7 @@ import boto3
 from boto3.dynamodb.conditions import Key, Attr
 from botocore.exceptions import ClientError
 
+
 def getParameter(param_name, region):
     # Create the SSM Client
     ssm = boto3.client(
@@ -35,11 +36,10 @@ def create_user_record(table, user_id, uid_first, uid_last, uid_email):
     else:
         uid = f'{uid_first} {uid_last}'
 
-
     print(f'Creating Item for user {uid} if it doesn\'t already exist')
     try:
         response = table.put_item(
-            Item = {
+            Item={
                 'user_id': user_id,
                 'biebered_others_count': 0,
                 'biebered_self_count': 0,
@@ -47,7 +47,7 @@ def create_user_record(table, user_id, uid_first, uid_last, uid_email):
                 'uid_last': uid_last,
                 'uid_email': uid_email
             },
-            ConditionExpression = 'attribute_not_exists(user_id)'
+            ConditionExpression='attribute_not_exists(user_id)'
         )
         print('User record created 👍🏽')
 
@@ -65,11 +65,11 @@ def update_user_record(table, user_id, update_item):
 
     response = table.update_item(
         Key={'user_id': user_id},
-        UpdateExpression = 'SET #ui = #ui + :increment',
-        ExpressionAttributeNames = {
+        UpdateExpression='SET #ui = #ui + :increment',
+        ExpressionAttributeNames={
             '#ui': update_item
         },
-        ExpressionAttributeValues = {
+        ExpressionAttributeValues={
             ':increment': 1
         }
     )
@@ -115,7 +115,6 @@ def biebered_others(record, table):
     latest_date = get_latest_date(dates_data)
     data = record['dynamodb']['NewImage']['biebered_by']['M'][latest_date]
 
-
     user_id = data['M']['user_id'].get('S', 'Unknown')
     uid_first = data['M']['first_name'].get('S', 'Unknown')
     uid_last = data['M']['last_name'].get('S', 'Unknown')
@@ -127,8 +126,6 @@ def biebered_others(record, table):
     response = update_user_record(table, user_id, 'biebered_others_count')
 
     return response
-
-
 
 
 def main(event):
@@ -146,7 +143,6 @@ def main(event):
     print(event)
     print(record)
 
-
     # Setting up some variables
     table_name = os.environ['users_tally_table_name']
     region = os.environ['region']
@@ -156,12 +152,12 @@ def main(event):
     biebered_others(record, table)
 
 
-
 # These two functions take care of either loading in data from Lambda triggers or from a test file if run locally
 # They then pass this event data onto the main() function with takes care of the rest
 def lambda_func(event, context):
 
     main(event)
+
 
 if __name__ == '__main__':
     with open('dynamodb_stream_test_data', encoding='utf-8') as stream_data:
