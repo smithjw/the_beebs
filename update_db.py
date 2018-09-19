@@ -11,7 +11,7 @@ def getParameter(param_name):
     # Create the SSM Client
     ssm = boto3.client(
         'ssm',
-        region_name='us-east-1'
+        region_name=os.environ['region']
     )
     # Get the requested parameter
     response = ssm.get_parameters(
@@ -25,7 +25,7 @@ def getParameter(param_name):
 
 
 def get_user_info(user_id):
-    slack_token = getParameter('PA_SLACK_BOT_TOKEN')
+    slack_token = getParameter('bieber_slack_bot_token')
     sc = SlackClient(slack_token)
 
     user_info = sc.api_call(
@@ -65,7 +65,7 @@ def create_user_item(table, timestamp, user_id, uid_first, uid_last, uid_email):
 
 def write_db_data(timestamp, user_id_info, biebered_by_info):
     table_name = os.environ['users_table_name']
-    dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+    dynamodb = boto3.resource('dynamodb', region_name=os.environ['region'])
     table = dynamodb.Table(table_name)
 
     # Info about the user that was Biebered

@@ -112,7 +112,7 @@ def biebered_stats_comment(response_url, self_stats, other_stats):
     else:
         data = {
             'response_type': 'ephemeral',
-            'text': 'There aren\'t enough results to display the leaderboard just yet. Please cherck again soon'
+            'text': 'There aren\'t enough results to display the leaderboard just yet. Please check again soon'
         }
 
     response = requests.post(response_url, json=data)
@@ -123,7 +123,7 @@ def biebered_stats_comment(response_url, self_stats, other_stats):
 def main(message):
     table_name = os.environ['users_tally_table_name']
     response_url = message['response_url'][0]
-    token = getParameter('PA_SLACK_BOT_TOKEN')
+    token = getParameter('bieber_slack_bot_token')
     table = get_table(table_name, region)
     items = table.scan()
     self_stats = get_top_biebered_self_users(items)

@@ -22,16 +22,22 @@ provider:
             - ssm:GetParameters
             - ssm:GetParameter
           Resource:
-            - 'arn:aws:ssm:us-east-1:465039758259:parameter/PA_TEAM_ID'
-            - 'arn:aws:ssm:us-east-1:465039758259:parameter/PA_SLACK_BOT_TOKEN'
-            - 'arn:aws:ssm:us-east-1:465039758259:parameter/PA_SLACK_VERIFICATION_TOKEN'
+            - 'arn:aws:ssm:${self:custom.region}:#{AWS::AccountId}:parameter/bieber_*'
+        - Effect: Allow
+          Action:
+            - kms:Decrypt
+          Resource:
+            # Dev Key
+            - 'arn:aws:kms:us-east-1:#{AWS::AccountId}:key/f5564c81-2f17-4ecb-acb4-6eddeae2a7a2'
+            # Prod Key
+            - 'arn:aws:kms:us-west-2:#{AWS::AccountId}:key/5b241634-2261-420b-b1db-595b72574583'
 
     environment:
         users_table_name: ${self:custom.usersTableName}
         users_tally_table_name: ${self:custom.usersTallyTableName}
         biebered_sns_arn: ${self:custom.snsBieberedArn}
         stats_sns_arn: ${self:custom.snsStatsArn}
-        region: 'us-east-1'
+        region: ${self:custom.region}
         stage: ${self:provider.stage}
 
 
@@ -52,12 +58,14 @@ functions:
                 - ${self:custom.snsStatsArn}
     response_followup:
         handler: bieber_followup.lambda_func
+        environment:
+          biebered_slack_chanel: ''
         events:
-            - sns: arn:aws:sns:${self:provider.region}:465039758259:${self:custom.snsBieberedName}
+            - sns: arn:aws:sns:${self:custom.region}:#{AWS::AccountId}:${self:custom.snsBieberedName}
     get_stats:
         handler: bieber_stats.lambda_func
         events:
-            - sns: arn:aws:sns:${self:provider.region}:465039758259:${self:custom.snsStatsName}
+            - sns: arn:aws:sns:${self:custom.region}:#{AWS::AccountId}:${self:custom.snsStatsName}
         iamRoleStatementsName: get_stats_role
         iamRoleStatementsInherit: true
         iamRoleStatements:
@@ -78,7 +86,7 @@ functions:
     update_db:
         handler: update_db.lambda_func
         events:
-            - sns: arn:aws:sns:${self:provider.region}:465039758259:${self:custom.snsBieberedName}
+            - sns: arn:aws:sns:${self:custom.region}:#{AWS::AccountId}:${self:custom.snsBieberedName}
         iamRoleStatementsName: update_db_role
         iamRoleStatementsInherit: true
         iamRoleStatements:
@@ -131,6 +139,7 @@ plugins:
   - serverless-wsgi
   - serverless-iam-roles-per-function
   - serverless-plugin-dynamodb-autoscaling
+  - serverless-pseudo-parameters
 
 
 custom:
@@ -138,6 +147,7 @@ custom:
     usersTallyTableName: 'UsersTallyTable-${self:provider.stage}'
     snsBieberedName: 'Biebered-${self:provider.stage}'
     snsStatsName: 'Stats-${self:provider.stage}'
+    region: 'us-west-2'
 
     snsBieberedArn:
         Fn::Join:
@@ -221,5 +231,5 @@ resources:
 
 
 package:
-    exclude:
-        - node_modules/**
+  exclude:
+    - node_modules/**

@@ -14,7 +14,7 @@ def getParameter(param_name):
     # Create the SSM Client
     ssm = boto3.client(
         'ssm',
-        region_name='us-east-1'
+        region_name=os.environ['region']
     )
     # Get the requested parameter
     response = ssm.get_parameters(
@@ -28,8 +28,8 @@ def getParameter(param_name):
 
 
 def is_request_valid(request):
-    token = getParameter('PA_SLACK_VERIFICATION_TOKEN')
-    team_id = getParameter('PA_SLACK_TEAM_ID')
+    token = getParameter('bieber_slack_verification_token')
+    team_id = getParameter('bieber_team_id')
     print(token, team_id)
 
     is_token_valid = request.form['token'] == token
@@ -41,8 +41,8 @@ def is_request_valid(request):
 
 
 def publish_to_sns(slash_command_response, sns_arn):
-
-    sns = boto3.client('sns', region_name='us-east-1')
+    region = os.environ['region']
+    sns = boto3.client('sns', region_name=region)
 
     response = sns.publish(
         TopicArn=sns_arn,
@@ -136,7 +136,7 @@ def post_install():
     # Save the bot token to an environmental variable or to your data store
     # for later use
     os.environ['SLACK_USER_TOKEN'] = auth_response['access_token']
-    os.environ['SLACK_BOT_TOKEN'] = auth_response['bot']['bot_access_token']
+    os.environ['slack_bot_token'] = auth_response['bot']['bot_access_token']
 
     print(auth_code)
 
