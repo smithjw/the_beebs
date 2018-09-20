@@ -33,105 +33,105 @@ provider:
             - 'arn:aws:kms:us-west-2:#{AWS::AccountId}:key/5b241634-2261-420b-b1db-595b72574583'
 
     environment:
-        users_table_name: ${self:custom.usersTableName}
-        users_tally_table_name: ${self:custom.usersTallyTableName}
-        biebered_sns_arn: ${self:custom.snsBieberedArn}
-        stats_sns_arn: ${self:custom.snsStatsArn}
-        region: ${self:custom.region}
-        stage: ${self:provider.stage}
+      region: ${self:custom.region}
+      stage: ${self:custom.stage}
+      users_table_name: ${self:custom.usersTableName}
+      users_tally_table_name: ${self:custom.usersTallyTableName}
+      biebered_sns_arn: ${self:custom.snsBieberedArn}
+      stats_sns_arn: ${self:custom.snsStatsArn}
 
 
 functions:
-    initial_response:
-        handler: wsgi.handler
-        events:
-            - http: ANY /
-            - http: 'ANY {proxy+}'
-        iamRoleStatementsName: initial_response_role
-        iamRoleStatementsInherit: true
-        iamRoleStatements:
-            - Effect: Allow
-              Action:
-                - sns:Publish
-              Resource:
-                - ${self:custom.snsBieberedArn}
-                - ${self:custom.snsStatsArn}
-    response_followup:
-        handler: bieber_followup.lambda_func
-        environment:
-          biebered_slack_chanel: ''
-        events:
-            - sns: arn:aws:sns:${self:custom.region}:#{AWS::AccountId}:${self:custom.snsBieberedName}
-    get_stats:
-        handler: bieber_stats.lambda_func
-        events:
-            - sns: arn:aws:sns:${self:custom.region}:#{AWS::AccountId}:${self:custom.snsStatsName}
-        iamRoleStatementsName: get_stats_role
-        iamRoleStatementsInherit: true
-        iamRoleStatements:
-            - Effect: Allow
-              Action:
-                - dynamodb:Query
-                - dynamodb:Scan
-                - dynamodb:GetItem
-                - dynamodb:PutItem
-                - dynamodb:UpdateItem
-                - dynamodb:DeleteItem
-                - dynamodb:DescribeStream
-                - dynamodb:GetRecords
-                - dynamodb:GetShardIterator
-                - dynamodb:ListStreams
-              Resource:
-                - ${self:custom.dbUsersTallyArn}
-    update_db:
-        handler: update_db.lambda_func
-        events:
-            - sns: arn:aws:sns:${self:custom.region}:#{AWS::AccountId}:${self:custom.snsBieberedName}
-        iamRoleStatementsName: update_db_role
-        iamRoleStatementsInherit: true
-        iamRoleStatements:
-            - Effect: Allow
-              Action:
-                - dynamodb:Query
-                - dynamodb:Scan
-                - dynamodb:GetItem
-                - dynamodb:PutItem
-                - dynamodb:UpdateItem
-                - dynamodb:DeleteItem
-                - dynamodb:DescribeStream
-                - dynamodb:GetRecords
-                - dynamodb:GetShardIterator
-                - dynamodb:ListStreams
-              Resource:
-                - ${self:custom.dbUsersArn}
-                - ${self:custom.dbUsersTallyArn}
-    tally_db:
-        handler: tally_db.lambda_func
-        events:
-            - stream:
-                type: dynamodb
-                arn:
-                    Fn::GetAtt:
-                        - DynamoDBUsersTable
-                        - StreamArn
-        iamRoleStatementsName: tally_db_role
-        iamRoleStatementsInherit: true
-        iamRoleStatements:
-            - Effect: Allow
-              Action:
-                - dynamodb:Query
-                - dynamodb:Scan
-                - dynamodb:GetItem
-                - dynamodb:PutItem
-                - dynamodb:UpdateItem
-                - dynamodb:DeleteItem
-                - dynamodb:DescribeStream
-                - dynamodb:GetRecords
-                - dynamodb:GetShardIterator
-                - dynamodb:ListStreams
-              Resource:
-                - ${self:custom.dbUsersTallyArn}
-                - ${self:custom.dbUsersArn}
+  initial_response:
+    handler: wsgi.handler
+    events:
+      - http: ANY /
+      - http: 'ANY {proxy+}'
+    iamRoleStatementsName: initial_response_role
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - sns:Publish
+        Resource:
+          - ${self:custom.snsBieberedArn}
+          - ${self:custom.snsStatsArn}
+  response_followup:
+    handler: bieber_followup.lambda_func
+    environment:
+      biebered_slack_chanel: ''
+    events:
+      - sns: arn:aws:sns:${self:custom.region}:#{AWS::AccountId}:${self:custom.snsBieberedName}
+  get_stats:
+    handler: bieber_stats.lambda_func
+    events:
+      - sns: arn:aws:sns:${self:custom.region}:#{AWS::AccountId}:${self:custom.snsStatsName}
+    iamRoleStatementsName: get_stats_role
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+          - dynamodb:Scan
+          - dynamodb:GetItem
+          - dynamodb:PutItem
+          - dynamodb:UpdateItem
+          - dynamodb:DeleteItem
+          - dynamodb:DescribeStream
+          - dynamodb:GetRecords
+          - dynamodb:GetShardIterator
+          - dynamodb:ListStreams
+        Resource:
+          - ${self:custom.dbUsersTallyArn}
+  update_db:
+    handler: update_db.lambda_func
+    events:
+      - sns: arn:aws:sns:${self:custom.region}:#{AWS::AccountId}:${self:custom.snsBieberedName}
+    iamRoleStatementsName: update_db_role
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+          - dynamodb:Scan
+          - dynamodb:GetItem
+          - dynamodb:PutItem
+          - dynamodb:UpdateItem
+          - dynamodb:DeleteItem
+          - dynamodb:DescribeStream
+          - dynamodb:GetRecords
+          - dynamodb:GetShardIterator
+          - dynamodb:ListStreams
+        Resource:
+          - ${self:custom.dbUsersArn}
+          - ${self:custom.dbUsersTallyArn}
+  tally_db:
+    handler: tally_db.lambda_func
+    events:
+      - stream:
+        type: dynamodb
+        arn:
+          Fn::GetAtt:
+            - DynamoDBUsersTable
+            - StreamArn
+    iamRoleStatementsName: tally_db_role
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+          - dynamodb:Scan
+          - dynamodb:GetItem
+          - dynamodb:PutItem
+          - dynamodb:UpdateItem
+          - dynamodb:DeleteItem
+          - dynamodb:DescribeStream
+          - dynamodb:GetRecords
+          - dynamodb:GetShardIterator
+          - dynamodb:ListStreams
+        Resource:
+          - ${self:custom.dbUsersTallyArn}
+          - ${self:custom.dbUsersArn}
 
 
 plugins:
@@ -143,91 +143,93 @@ plugins:
 
 
 custom:
-    usersTableName: 'UsersTable-${self:provider.stage}'
-    usersTallyTableName: 'UsersTallyTable-${self:provider.stage}'
-    snsBieberedName: 'Biebered-${self:provider.stage}'
-    snsStatsName: 'Stats-${self:provider.stage}'
-    region: 'us-west-2'
+  stage: ${opt:stage, self:provider.stage}
+  region: ${opt:region, self:provider.region}
+  usersTableName: 'UsersTable-${self:custom.stage}'
+  usersTallyTableName: 'UsersTallyTable-${self:custom.stage}'
+  snsBieberedName: 'Biebered-${self:custom.stage}'
+  snsStatsName: 'Stats-${self:custom.stage}'
 
-    snsBieberedArn:
-        Fn::Join:
-              - ''
-              - - 'arn:aws:sns:'
-                - Ref: AWS::Region
-                - ":"
-                - Ref: AWS::AccountId
-                - ":"
-                - Fn::GetAtt:
-                  - SNSUsersQueue
-                  - TopicName
-    snsStatsArn:
-        Fn::Join:
-              - ''
-              - - 'arn:aws:sns:'
-                - Ref: AWS::Region
-                - ":"
-                - Ref: AWS::AccountId
-                - ":"
-                - Fn::GetAtt:
-                  - SNSStatsQueue
-                  - TopicName
 
-    dbUsersArn: { 'Fn::GetAtt': ['DynamoDBUsersTable', 'Arn' ] }
-    dbUsersTallyArn: { 'Fn::GetAtt': ['DynamoDBUsersTallyTable', 'Arn' ] }
+  snsBieberedArn:
+    Fn::Join:
+      - ''
+      - - 'arn:aws:sns:'
+        - Ref: AWS::Region
+        - ":"
+        - Ref: AWS::AccountId
+        - ":"
+        - Fn::GetAtt:
+          - SNSUsersQueue
+          - TopicName
+  snsStatsArn:
+    Fn::Join:
+      - ''
+      - - 'arn:aws:sns:'
+        - Ref: AWS::Region
+        - ":"
+        - Ref: AWS::AccountId
+        - ":"
+        - Fn::GetAtt:
+          - SNSStatsQueue
+          - TopicName
 
-    wsgi:
-        app: bieber.app
-        packRequirements: false
-    pythonRequirements:
-        dockerizePip: non-linux
-    serverless-iam-roles-per-function:
-        defaultInherit: true
+  dbUsersArn: { 'Fn::GetAtt': ['DynamoDBUsersTable', 'Arn' ] }
+  dbUsersTallyArn: { 'Fn::GetAtt': ['DynamoDBUsersTallyTable', 'Arn' ] }
+
+  wsgi:
+    app: bieber.app
+    packRequirements: false
+  pythonRequirements:
+    dockerizePip: non-linux
+  serverless-iam-roles-per-function:
+    defaultInherit: true
 
 
 resources:
     Resources:
-        DynamoDBUsersTable:
-            Type: 'AWS::DynamoDB::Table'
-            Properties:
-                AttributeDefinitions:
-                    -
-                        AttributeName: user_id
-                        AttributeType: S
-                KeySchema:
-                    -
-                        AttributeName: user_id
-                        KeyType: HASH
-                ProvisionedThroughput:
-                    ReadCapacityUnits: 10
-                    WriteCapacityUnits: 10
-                TableName: ${self:custom.usersTableName}
-                StreamSpecification:
-                    StreamViewType: NEW_IMAGE
-        DynamoDBUsersTallyTable:
-            Type: 'AWS::DynamoDB::Table'
-            Properties:
-                AttributeDefinitions:
-                    -
-                        AttributeName: user_id
-                        AttributeType: S
-                KeySchema:
-                    -
-                        AttributeName: user_id
-                        KeyType: HASH
-                ProvisionedThroughput:
-                    ReadCapacityUnits: 10
-                    WriteCapacityUnits: 10
-                TableName: ${self:custom.usersTallyTableName}
-        SNSUsersQueue:
-            Type: AWS::SNS::Topic
-            Properties:
-                DisplayName: "SNS Topic to receive and send initial SNS messages"
-                TopicName: ${self:custom.snsBieberedName}
-        SNSStatsQueue:
-            Type: AWS::SNS::Topic
-            Properties:
-                DisplayName: "SNS Topic to receive and send status SNS messages"
-                TopicName: ${self:custom.snsStatsName}
+      DynamoDBUsersTable:
+        Type: 'AWS::DynamoDB::Table'
+        Properties:
+          AttributeDefinitions:
+            -
+              AttributeName: user_id
+              AttributeType: S
+          KeySchema:
+            -
+              AttributeName: user_id
+              KeyType: HASH
+          ProvisionedThroughput:
+            ReadCapacityUnits: 10
+            WriteCapacityUnits: 10
+          TableName: ${self:custom.usersTableName}
+          StreamSpecification:
+            StreamViewType: NEW_IMAGE
+      DynamoDBUsersTallyTable:
+        Type: 'AWS::DynamoDB::Table'
+        Properties:
+          AttributeDefinitions:
+            -
+              AttributeName: user_id
+              AttributeType: S
+          KeySchema:
+            -
+              AttributeName: user_id
+              KeyType: HASH
+          ProvisionedThroughput:
+            ReadCapacityUnits: 10
+            WriteCapacityUnits: 10
+          TableName: ${self:custom.usersTallyTableName}
+      SNSUsersQueue:
+        Type: AWS::SNS::Topic
+        Properties:
+          DisplayName: "SNS Topic to receive and send initial SNS messages"
+          TopicName: ${self:custom.snsBieberedName}
+      SNSStatsQueue:
+        Type: AWS::SNS::Topic
+        Properties:
+          DisplayName: "SNS Topic to receive and send status SNS messages"
+          TopicName: ${self:custom.snsStatsName}
 
 
 package:
