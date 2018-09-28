@@ -109,11 +109,8 @@ functions:
     handler: tally_db.lambda_func
     events:
       - stream:
-        type: dynamodb
-        arn:
-          Fn::GetAtt:
-            - DynamoDBUsersTable
-            - StreamArn
+          type: dynamodb
+          arn: ${self:custom.dbUsersStreamArn}
     iamRoleStatementsName: tally_db_role
     iamRoleStatementsInherit: true
     iamRoleStatements:
@@ -175,6 +172,7 @@ custom:
           - TopicName
 
   dbUsersArn: { 'Fn::GetAtt': ['DynamoDBUsersTable', 'Arn' ] }
+  dbUsersStreamArn: { 'Fn::GetAtt': ['DynamoDBUsersTable', 'StreamArn' ] }
   dbUsersTallyArn: { 'Fn::GetAtt': ['DynamoDBUsersTallyTable', 'Arn' ] }
 
   wsgi:
