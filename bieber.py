@@ -68,7 +68,7 @@ def help_comment(response_url, comment_text):
                     },
                     {
                         'title': 'Bieber',
-                        'value': '`/bieber @username` will bieber the Camper and give a point to @username'
+                        'value': '`/bieber @username` will Bieber the host computer and give a point to @username'
                     },
                     {
                         'title': 'Stats',
@@ -83,17 +83,18 @@ def help_comment(response_url, comment_text):
 
 
 def initial_comment(response_url, user_id):
+    ss_url = os.environ['self_service_url']
     data = {
         'text': f'You\'ve just Biebered <@{user_id}>\'s Mac! Clicking the button below will Bieberify the Desktop and Lock the Screen',
         'response_type': 'ephemeral',
         'attachments': [
             {
-                'fallback': 'Click here to Bieberfy my Mac <jamfselfservice://content?entity=policy&id=337&action=execute|click here>',
+                'fallback': f'Click here to Bieberfy my Mac <{ss_url}|click here>',
                 'actions': [
                     {
                         'type': 'button',
                         'text': 'Bieberify this Mac',
-                        'url': 'jamfselfservice://content?entity=policy&id=337&action=execute',
+                        'url': f'{ss_url}',
                         'style': 'danger'
                     }
                 ]
@@ -102,46 +103,6 @@ def initial_comment(response_url, user_id):
     }
 
     requests.post(response_url, json=data)
-
-# Need to fetch these from Parameter Store
-# client_id = getParameter('SLACK_CLIENT_ID')
-# client_secret = getParameter('SLACK_CLIENT_SECRET')
-# oauth_scope = getParameter('SLACK_BOT_SCOPE')
-
-
-@app.route('/begin_auth', methods=['GET'])
-def pre_install():
-    return '''
-        <a href='https://slack.com/oauth/authorize?scope=incoming-webhook,commands,bot&client_id=7627545351.425890268918'><img alt='Add to Slack' height='40' width='139' src='https://platform.slack-edge.com/img/add_to_slack.png' srcset='https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x' /></a>
-    '''.format(oauth_scope, client_id)
-
-
-@app.route('/finish_auth', methods=['GET', 'POST'])
-def post_install():
-
-    # Retrieve the auth code from the request params
-    auth_code = request.args['code']
-
-    # An empty string is a valid token for this request
-    sc = SlackClient('')
-
-    # Request the auth tokens from Slack
-    auth_response = sc.api_call(
-        'oauth.access',
-        client_id=client_id,
-        client_secret=client_secret,
-        code=auth_code
-    )
-
-    # Save the bot token to an environmental variable or to your data store
-    # for later use
-    os.environ['SLACK_USER_TOKEN'] = auth_response['access_token']
-    os.environ['slack_bot_token'] = auth_response['bot']['bot_access_token']
-
-    print(auth_code)
-
-    # Don't forget to let the user know that auth has succeeded!
-    return 'Auth complete!'
 
 
 @app.route('/bieber', methods=['POST'])

@@ -1,17 +1,4 @@
-# Welcome to Serverless!
-#
-# This file is the main config file for your service.
-# It's very minimal at this point and uses default values.
-# You can always add more config options for more control.
-# We've included some commented out config examples here.
-# Just uncomment any of them to get that config option.
-#
-# For full config options, check the docs:
-#    docs.serverless.com
-#
-# Happy Coding!
-
-service: bieber-bot
+service: the_biebs
 
 provider:
     name: aws
@@ -27,10 +14,7 @@ provider:
           Action:
             - kms:Decrypt
           Resource:
-            # Dev Key
-            - 'arn:aws:kms:us-east-1:#{AWS::AccountId}:key/f5564c81-2f17-4ecb-acb4-6eddeae2a7a2'
-            # Prod Key
-            - 'arn:aws:kms:us-west-2:#{AWS::AccountId}:key/5b241634-2261-420b-b1db-595b72574583'
+            - 'arn:aws:kms:${self:custom.region}:#{AWS::AccountId}:key/${self:custom.keyid}'
 
     environment:
       region: ${self:custom.region}
@@ -56,6 +40,8 @@ functions:
         Resource:
           - ${self:custom.snsBieberedArn}
           - ${self:custom.snsStatsArn}
+    environment:
+      self_service_url: ${self:custom.ssurl}
   response_followup:
     handler: bieber_followup.lambda_func
     environment:
@@ -142,6 +128,8 @@ plugins:
 custom:
   stage: ${opt:stage, self:provider.stage}
   region: ${opt:region, self:provider.region}
+  keyid: ${opt:keyid}
+  selfserviceurl: ${opt:selfserviceurl}
   usersTableName: 'UsersTable-${self:custom.stage}'
   usersTallyTableName: 'UsersTallyTable-${self:custom.stage}'
   snsBieberedName: 'Biebered-${self:custom.stage}'

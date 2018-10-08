@@ -1,15 +1,23 @@
 {
-  "name": "bieber-bot",
-  "description": "",
+  "name": "the_biebs",
+  "description": "An amazing Slack Bot",
   "version": "0.1.0",
   "dependencies": {
     "serverless": "^1.31.0",
     "serverless-plugin-dynamodb-autoscaling": "^2.2.0",
-    "serverless-pseudo-parameters": "^2.2.0"
-  },
-  "devDependencies": {
+    "serverless-pseudo-parameters": "^2.2.0",
     "serverless-iam-roles-per-function": "^1.0.4",
     "serverless-python-requirements": "^4.1.1",
     "serverless-wsgi": "^1.5.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/smithjw/the_biebs.git"
+  },
+  "author": "James Smith",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/smithjw/the_biebs/issues"
+  },
+  "homepage": "https://github.com/smithjw/the_biebs#readme"
 }
